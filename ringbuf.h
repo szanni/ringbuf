@@ -76,6 +76,9 @@ _ringbuf_min(size_t a, size_t b)
 		return b;
 }
 
+//! True ring buffer array index.
+#define _RINGBUF_IDX(idx) (idx % rb->capacity)
+
 /*!
  * \brief Write to ring buffer.
  * \warning Only call this function from a single producer thread.
@@ -91,12 +94,11 @@ ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 	size_t write_idx = atomic_load_explicit(&rb->write_idx, memory_order_relaxed);
 	size_t read_idx = atomic_load_explicit(&rb->read_idx, memory_order_acquire);
 	size_t size = _ringbuf_size(rb, read_idx, write_idx);
-	size_t true_write_idx = write_idx % rb->capacity;
 
 	if (size < rb->capacity) {
 		size_t write0, write1;
 		size_t write = _ringbuf_min(rb->capacity - size, buf_size);
-		size_t write_overflow = true_write_idx + write;
+		size_t write_overflow = _RINGBUF_IDX(write_idx) + write;
 		if (write_overflow > rb->capacity) {
 			write1 = write_overflow % rb->capacity;
 			write0 = write - write1;
@@ -106,7 +108,7 @@ ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 			write1 = 0;
 		}
 
-		memcpy(&rb->data[true_write_idx], buf, write0);
+		memcpy(&rb->data[_RINGBUF_IDX(write_idx)], buf, write0);
 
 		if (write1)
 			memcpy(rb->data, buf + write0, write1);
@@ -134,13 +136,12 @@ ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 	size_t read_idx = atomic_load_explicit(&rb->read_idx, memory_order_relaxed);
 	size_t write_idx = atomic_load_explicit(&rb->write_idx, memory_order_acquire);
 	size_t size = _ringbuf_size(rb, read_idx, write_idx);
-	size_t true_read_idx = read_idx % rb->capacity;
 
 	if (size > 0)
 	{
 		size_t read0, read1;
 		size_t read = _ringbuf_min(size, buf_size);
-		size_t read_overflow = true_read_idx + read;
+		size_t read_overflow = _RINGBUF_IDX(read_idx) + read;
 		if (read_overflow > rb->capacity) {
 			read1 = read_overflow % rb->capacity;
 			read0 = read - read1;
@@ -150,7 +151,7 @@ ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 			read1 = 0;
 		}
 
-		memcpy(buf, &rb->data[true_read_idx], read0);
+		memcpy(buf, &rb->data[_RINGBUF_IDX(read_idx)], read0);
 
 		if (read1)
 			memcpy(buf + read0, rb->data, read1);
