@@ -10,6 +10,7 @@ struct ringbuf {
 	_Atomic size_t read_idx;
 	_Atomic size_t write_idx;
 	size_t capacity;
+	size_t capacity_mask;
 	uint8_t data[1];
 };
 
@@ -39,6 +40,8 @@ ringbuf_new(size_t capacity)
 	atomic_init(&rb->read_idx, 0);
 	atomic_init(&rb->write_idx, capacity * 2);
 	rb->capacity = capacity;
+	// TODO: actually use capacity mask instead of %
+	rb->capacity_mask = capacity - 1;
 	return rb;
 }
 
