@@ -9,6 +9,23 @@ test_new ()
 	ringbuf_free(rb);
 }
 
+
+void
+test_new_power_of_two_no_increase ()
+{
+	struct ringbuf *rb = ringbuf_new(8);
+	assert(rb->capacity == 8);
+	ringbuf_free(rb);
+}
+
+void
+test_new_non_power_of_two ()
+{
+	struct ringbuf *rb = ringbuf_new(7);
+	assert(rb->capacity == 8);
+	ringbuf_free(rb);
+}
+
 void
 test_write_fill ()
 {
@@ -187,6 +204,8 @@ int
 main(void)
 {
 	test_new();
+	test_new_power_of_two_no_increase();
+	test_new_non_power_of_two();
 	test_write_fill();
 	test_write_fill_chunks();
 	test_write_overfill();

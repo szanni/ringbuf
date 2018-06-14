@@ -25,7 +25,12 @@ struct ringbuf {
 static struct ringbuf *
 ringbuf_new(size_t capacity)
 {
+	size_t power_of_two;
 	struct ringbuf *rb;
+
+	for (power_of_two = 1; 1 << power_of_two < capacity; ++power_of_two) {}
+
+	capacity = 1 << power_of_two;
 
 	rb = malloc(sizeof(rb) + sizeof(rb->data) * (capacity - 1));
 	if (rb == NULL)
