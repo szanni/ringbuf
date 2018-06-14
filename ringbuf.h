@@ -61,7 +61,7 @@ _ringbuf_min(size_t a, size_t b)
 }
 
 //! True ring buffer array index.
-#define _RINGBUF_IDX(idx) (idx % rb->capacity)
+#define _RINGBUF_IDX(idx) ((idx) % rb->capacity)
 
 /*!
  * \brief Write to ring buffer.
