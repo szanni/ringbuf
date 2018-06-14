@@ -29,6 +29,15 @@ struct ringbuf {
 	uint8_t data[1];
 };
 
+/*!
+ * \brief Allocate a new SPSC ring buffer.
+ *
+ * Allocate a new single producer, single consumer ring buffer.
+ * The capacity will be rounded up to the next power of 2.
+ *
+ * \param capacity Capacity of the ring buffer.
+ * \return A pointer to a newly allocated ring buffer, NULL on error.
+ */
 static struct ringbuf *
 ringbuf_new(size_t capacity)
 {
@@ -43,6 +52,7 @@ ringbuf_new(size_t capacity)
 	rb->capacity = capacity;
 	return rb;
 }
+
 static inline size_t
 _ringbuf_size(struct ringbuf *rb, size_t read_idx, size_t write_idx)
 {
@@ -58,6 +68,15 @@ _ringbuf_min(size_t a, size_t b)
 		return b;
 }
 
+/*!
+ * \brief Write to ring buffer.
+ * \warning Only call this function from a single producer thread.
+ *
+ * \param rb Ring buffer instance.
+ * \param buf Buffer holding data to be written to ring buffer.
+ * \param buf_size Buffer size in bytes.
+ * \return Number of bytes written to ring buffer.
+ */
 static size_t
 ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 {
@@ -92,6 +111,15 @@ ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 	return 0;
 }
 
+/*!
+ * \brief Read from ring buffer.
+ * \warning Only call this function from a single consumer thread.
+ *
+ * \param rb Ring buffer instance.
+ * \param buf Buffer to copy data to from ring buffer.
+ * \param buf_size Buffer size in bytes.
+ * \return Number of bytes read from ring buffer.
+ */
 static size_t
 ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 {
@@ -127,6 +155,10 @@ ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 	return 0;
 }
 
+/*!
+ * \brief Free allocated ring buffer.
+ * \param rb Pointer to ring buffer or NULL.
+ */
 static void
 ringbuf_free(struct ringbuf *rb)
 {
