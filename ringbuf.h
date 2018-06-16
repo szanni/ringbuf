@@ -11,7 +11,7 @@ struct ringbuf {
 	_Atomic size_t write_idx;
 	size_t capacity;
 	size_t capacity_mask;
-	uint8_t data[1];
+	uint8_t *data;
 };
 
 /*!
@@ -33,9 +33,15 @@ ringbuf_new(size_t capacity)
 
 	capacity = 1 << power_of_two;
 
-	rb = malloc(sizeof(rb) + sizeof(rb->data) * (capacity - 1));
+	rb = malloc(sizeof(rb));
 	if (rb == NULL)
 		return NULL;
+
+	rb->data = malloc(capacity * sizeof(*rb->data));
+	if (rb->data == NULL) {
+		free(rb);
+		return NULL;
+	}
 
 	atomic_init(&rb->read_idx, 0);
 	atomic_init(&rb->write_idx, capacity * 2);
