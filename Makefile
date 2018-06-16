@@ -1,10 +1,16 @@
 CC?=clang
-CFLAGS+= -std=c11 -Wall -Wextra -pedantic
+CFLAGS+= -std=c11
+CFLAGS+= -Wall -Wextra -pedantic
+CFLAGS+= `pkg-config --cflags cmocka`
+LDFLAGS+= `pkg-config --libs cmocka`
 
 all: test
 	@./test
 
 test: test.c ringbuf.h
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
 
-.PHONY: all
+clean:
+	rm -f test
+
+.PHONY: all clean
