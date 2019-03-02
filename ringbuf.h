@@ -1,9 +1,10 @@
 #ifndef RINGBUF_H
 #define RINGBUF_H
 
-#include <stdlib.h>
-#include <stdatomic.h>
 #include <errno.h>
+#include <inttypes.h>
+#include <stdatomic.h>
+#include <stdlib.h>
 #include <string.h>
 
 struct ringbuf {
