@@ -34,7 +34,7 @@ ringbuf_new(size_t capacity)
 
 	capacity = 1 << power_of_two;
 
-	rb = malloc(sizeof(rb));
+	rb = malloc(sizeof(*rb));
 	if (rb == NULL)
 		return NULL;
 
