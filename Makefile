@@ -1,16 +1,44 @@
-CC?=clang
-CFLAGS+= -std=c11
-CFLAGS+= -Wall -Wextra -pedantic
-CFLAGS+= `pkg-config --cflags cmocka`
-LDFLAGS+= `pkg-config --libs cmocka`
+.PHONY: all check install dist clean
 
-all: test
-	@./test
+INSTALL ?= install
+PREFIX ?= /usr/local
+DESTDIR ?=
+CC ?= cc
+PKG_CONFIG ?= pkg-config
+CFLAGS += -std=c11
+CFLAGS += -Wall -Wextra -pedantic
+CFLAGS += -fprofile-arcs -ftest-coverage
+CFLAGS += -O3
+CFLAGS += `$(PKG_CONFIG) --cflags cmocka`
+LDFLAGS += `$(PKG_CONFIG) --libs cmocka`
 
-test: test.c ringbuf.h
-	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@
+PACKAGE = ringbuf
+VERSION = 0.0.0
+
+DIST = Makefile ringbuf.h unused.h test.c LICENSE
+
+all:
+	@echo 'As this is a header only library there is nothing to be done.'
+	@echo 'See `make check` and `make install`.'
+
+check: clean test
+	./test
+
+test: test.c ringbuf.h unused.h
+	$(CC) test.c -o $@ $(CFLAGS) $(LDFLAGS)
+
+install: ringbuf.h
+	$(INSTALL) -D -m644 ringbuf.h "$(DESTDIR)$(PREFIX)/include/ringbuf.h"
+
+dist: $(DIST)
+	mkdir -p $(PACKAGE)-$(VERSION)
+	cp $(DIST) $(PACKAGE)-$(VERSION)
+	tar -cf $(PACKAGE)-$(VERSION).tar $(PACKAGE)-$(VERSION)
+	gzip -fk $(PACKAGE)-$(VERSION).tar
+	xz -f $(PACKAGE)-$(VERSION).tar
 
 clean:
-	rm -f test
+	rm -f test *.gcov *.gcda *.gcno
 
-.PHONY: all clean
+distclean: clean
+	rm -rf $(PACKAGE)-$(VERSION){,.tar.gz,.tar.xz}
