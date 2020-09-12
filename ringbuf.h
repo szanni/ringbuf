@@ -57,7 +57,6 @@ ringbuf_new(size_t capacity)
 	atomic_init(&rb->read_idx, 0);
 	atomic_init(&rb->write_idx, capacity * 2);
 	rb->capacity = capacity;
-	// TODO: actually use capacity mask instead of %
 	rb->capacity_mask = capacity - 1;
 	return rb;
 }
@@ -65,7 +64,7 @@ ringbuf_new(size_t capacity)
 static inline size_t
 _ringbuf_size(struct ringbuf *rb, size_t read_idx, size_t write_idx)
 {
-	return (write_idx - read_idx) % (rb->capacity * 2);
+	return (write_idx - read_idx) & ((rb->capacity_mask << 1) | 1);
 }
 
 static inline size_t
@@ -78,7 +77,7 @@ _ringbuf_min(size_t a, size_t b)
 }
 
 //! True ring buffer array index.
-#define _RINGBUF_IDX(idx) ((idx) % rb->capacity)
+#define _RINGBUF_IDX(idx) ((idx) & rb->capacity_mask)
 
 /*!
  * \brief Write to ring buffer.
@@ -101,7 +100,7 @@ ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 		size_t write = _ringbuf_min(rb->capacity - size, buf_size);
 		size_t write_overflow = _RINGBUF_IDX(write_idx) + write;
 		if (write_overflow > rb->capacity) {
-			write1 = write_overflow % rb->capacity;
+			write1 = write_overflow & rb->capacity_mask;
 			write0 = write - write1;
 		}
 		else {
@@ -144,7 +143,7 @@ ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size)
 		size_t read = _ringbuf_min(size, buf_size);
 		size_t read_overflow = _RINGBUF_IDX(read_idx) + read;
 		if (read_overflow > rb->capacity) {
-			read1 = read_overflow % rb->capacity;
+			read1 = read_overflow & rb->capacity_mask;
 			read0 = read - read1;
 		}
 		else {
