@@ -7,6 +7,7 @@ CC ?= cc
 PKG_CONFIG ?= pkg-config
 CFLAGS += -std=c11
 CFLAGS += -Wall -Wextra -pedantic
+CFLAGS += -fsanitize=address
 CFLAGS += -fprofile-arcs -ftest-coverage
 CFLAGS += -O3
 CFLAGS += `$(PKG_CONFIG) --cflags cmocka`
