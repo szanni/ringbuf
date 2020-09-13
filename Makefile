@@ -1,4 +1,4 @@
-.PHONY: all check install dist clean
+.PHONY: all check stress install dist clean
 
 INSTALL ?= install
 PREFIX ?= /usr/local
@@ -7,7 +7,11 @@ CC ?= cc
 PKG_CONFIG ?= pkg-config
 CFLAGS += -std=c11
 CFLAGS += -Wall -Wextra -pedantic
-CFLAGS += -fsanitize=address
+CFLAGS += -pthread
+#CFLAGS += -fsanitize=address
+#CFLAGS += -fno-omit-frame-pointer
+CFLAGS += -fsanitize=undefined
+CFLAGS += -fsanitize=thread
 CFLAGS += -fprofile-arcs -ftest-coverage
 CFLAGS += -O3
 CFLAGS += `$(PKG_CONFIG) --cflags cmocka`
@@ -22,8 +26,12 @@ all:
 	@echo 'As this is a header only library there is nothing to be done.'
 	@echo 'See `make check` and `make install`.'
 
-check: clean test
+check: test
 	./test
+
+stress: stress.c ringbuf.h
+	$(CC) stress.c -o $@ $(CFLAGS) $(LDFLAGS)
+	./stress
 
 test: test.c ringbuf.h unused.h
 	$(CC) test.c -o $@ $(CFLAGS) $(LDFLAGS)
@@ -39,7 +47,7 @@ dist: $(DIST)
 	xz -f $(PACKAGE)-$(VERSION).tar
 
 clean:
-	rm -f test *.gcov *.gcda *.gcno
+	rm -f test stress *.gcov *.gcda *.gcno
 
 distclean: clean
 	rm -rf $(PACKAGE)-$(VERSION){,.tar.gz,.tar.xz}
