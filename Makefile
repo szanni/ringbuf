@@ -24,7 +24,7 @@ DIST = Makefile ringbuf.h unused.h test.c LICENSE
 
 all:
 	@echo 'As this is a header only library there is nothing to be done.'
-	@echo 'See `make check` and `make install`.'
+	@echo 'See `make check`, `make stress`, and `make install`.'
 
 check: test
 	./test
