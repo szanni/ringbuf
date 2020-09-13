@@ -1,8 +1,8 @@
 ringbuf
 =======
 
-*ringbuf* is a lock-free, single producer/single consumer (SPSC) ringbuffer
-implementation using C11 atomics.
+*ringbuf* is a lock-free, single producer/single consumer (SPSC) ring
+buffer/circular buffer implementation using C11 atomics.
 
 Its aim is to be as simple as possible, while being correct. So no fancy
 look ahead functions, memory reserving or similar.
@@ -16,7 +16,7 @@ The backing buffer consists of an `uint8_t` array of user specified size. All
 `write` operations will return the number of bytes read/written.
 
 *ringbuf* does partial `read` and `write` depending on how full/empty the
-ringbuffer is and how big the user supplied buffers are.
+ring buffer is and how big the user supplied buffers are.
 
 *ringbuf* was originally developed for audio applications, aiding in the
 separation of audio decoding and PCM output.
@@ -31,7 +31,7 @@ directory and include it.
 #include "ringbuf.h"
 ```
 
-Then create a ringbuf instance. The size will be rounded up to the next power
+Then create a *ringbuf* instance. The size will be rounded up to the next power
 of 2.
 
 ```c
@@ -46,9 +46,9 @@ size_t ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size);
 ```
 
 Make sure to check the returned size, as it might be smaller than `buf_size`
-depending on how full the ringbuffer is.
+depending on how full the ring buffer is.
 
-On the consumer thread you can now read from the ringbuffer by calling
+On the consumer thread you can now read from the ring buffer by calling
 `ringbuf_read`.
 
 ```c
@@ -56,10 +56,10 @@ size_t ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size);
 ```
 
 This will read a maximum of `buf_size` bytes into the buffer `buf`, depending
-on how full the ringbuffer is. Check the return value on how many bytes
+on how full the ring buffer is. Check the return value on how many bytes
 were actually copied.
 
-Once all operations have completed make sure to free the ringbuffer by calling:
+Once all operations have completed make sure to free the ring buffer by calling:
 
 ```c
 void ringbuf_free(struct ringbuf *rb);
