@@ -27,17 +27,23 @@ Usage
 To use the single file header library simply drop `ringbuf.h` into your source
 directory and include it.
 
-    #include "ringbuf.h"
+```c
+#include "ringbuf.h"
+```
 
 Then create a ringbuf instance. The size will be rounded up to the next power
 of 2.
 
-    struct ringbuf * ringbuf_new(size_t capacity);
+```c
+struct ringbuf * ringbuf_new(size_t capacity);
+```
 
 Now create your producer and consumer threads. The producer can now write to
 the buffer by calling `ringbuf_write`.
 
-    size_t ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size); //returns number of bytes written
+```c
+size_t ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size);
+```
 
 Make sure to check the returned size, as it might be smaller than `buf_size`
 depending on how full the ringbuffer is.
@@ -45,7 +51,9 @@ depending on how full the ringbuffer is.
 On the consumer thread you can now read from the ringbuffer by calling
 `ringbuf_read`.
 
-    size_t ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size);; //returns number of bytes read
+```c
+size_t ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size);
+```
 
 This will read a maximum of `buf_size` bytes into the buffer `buf`, depending
 on how full the ringbuffer is. Check the return value on how many bytes
@@ -53,7 +61,9 @@ were actually copied.
 
 Once all operations have completed make sure to free the ringbuffer by calling:
 
-    void ringbuf_free(struct ringbuf *rb);
+```c
+void ringbuf_free(struct ringbuf *rb);
+```
 
 Dependencies
 ============
