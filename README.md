@@ -9,7 +9,8 @@ look ahead functions, memory reserving or similar.
 
 *ringbuf* consists of 4 functions `new`, `read`, `write`, and `free`.
 
-The backing buffer consists of an `uint8_t` array of user specified size.
+The backing buffer consists of an `uint8_t` array of user specified size. All
+`read` and `write` operations copy either from or to this buffer.
 
 *ringbuf* is non-blocking for both `read` and `write` operations. `read` and
 `write` operations will return the number of bytes read/written.
@@ -23,20 +24,20 @@ separation of audio decoding and PCM output.
 Usage
 =====
 
-To use the single file header library simply include drop `ringbuf.h` into
-your source directory and include it:
+To use the single file header library simply drop `ringbuf.h` into your source
+directory and include it.
 
     #include "ringbuf.h"
 
 Then create a ringbuf instance. The size will be rounded up to the next power
 of 2.
 
-    struct ringbuf *rb = ringbuf_new(1024);
+    struct ringbuf * ringbuf_new(size_t capacity);
 
 Now create your producer and consumer threads. The producer can now write to
 the buffer by calling `ringbuf_write`.
 
-    ringbuf_write(rb, buf, buf_size); //returns number of bytes written
+    size_t ringbuf_write(struct ringbuf *rb, uint8_t *buf, size_t buf_size); //returns number of bytes written
 
 Make sure to check the returned size, as it might be smaller than `buf_size`
 depending on how full the ringbuffer is.
@@ -44,15 +45,15 @@ depending on how full the ringbuffer is.
 On the consumer thread you can now read from the ringbuffer by calling
 `ringbuf_read`.
 
-    ringbuf_read(rb, buf, buf_size); //returns number of bytes read
+    size_t ringbuf_read(struct ringbuf *rb, uint8_t *buf, size_t buf_size);; //returns number of bytes read
 
-This will write a maximum of `buf_size` bytes into the buffer `buf`, depending
+This will read a maximum of `buf_size` bytes into the buffer `buf`, depending
 on how full the ringbuffer is. Check the return value on how many bytes
-were actually read/written.
+were actually copied.
 
 Once all operations have completed make sure to free the ringbuffer by calling:
 
-    ringbuf_free(rb);
+    void ringbuf_free(struct ringbuf *rb);
 
 Dependencies
 ============
